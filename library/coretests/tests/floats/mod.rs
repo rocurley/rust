@@ -251,6 +251,28 @@ mod f32;
 mod f64;
 
 float_test! {
+    name: nan,
+    attrs: {
+        const: #[cfg(false)],
+        f16: #[cfg(any(miri, target_has_reliable_f16))],
+        f128: #[cfg(any(miri, target_has_reliable_f128))],
+    },
+    test<Float> {
+        use std::num::FpCategory as Fp;
+        let nan: Float = Float::NAN;
+        assert!(nan.is_nan());
+        assert!(!nan.is_infinite());
+        assert!(!nan.is_finite());
+        assert!(!nan.is_normal());
+        assert!(nan.is_sign_positive());
+        assert!(!nan.is_sign_negative());
+        assert!(matches!(nan.classify(), Fp::Nan));
+        // Ensure the quiet bit is set.
+        assert!(nan.to_bits() & (1 << (Float::MANTISSA_DIGITS - 2)) != 0);
+    }
+}
+
+float_test! {
     name: min,
     attrs: {
         f16: #[cfg(any(miri, target_has_reliable_f16_math))],
@@ -693,26 +715,5 @@ float_test! {
         assert!(Float::NAN.fract().is_nan());
         assert!(Float::INFINITY.fract().is_nan());
         assert!(Float::NEG_INFINITY.fract().is_nan());
-    }
-}
-
-float_test! {
-    name: nan,
-    attrs: {
-        f16: #[cfg(any(miri, target_has_reliable_f16_math))],
-        f128: #[cfg(any(miri, target_has_reliable_f128_math))],
-    },
-    test<Float> {
-        use std::num::FpCategory as Fp;
-        let nan: Float = Float::NAN;
-        assert!(nan.is_nan());
-        assert!(!nan.is_infinite());
-        assert!(!nan.is_finite());
-        assert!(!nan.is_normal());
-        assert!(nan.is_sign_positive());
-        assert!(!nan.is_sign_negative());
-        assert!(matches!(nan.classify(), Fp::Nan));
-        // Ensure the quiet bit is set.
-        assert!(nan.to_bits() & (1 << (Float::MANTISSA_DIGITS - 2)) != 0);
     }
 }
