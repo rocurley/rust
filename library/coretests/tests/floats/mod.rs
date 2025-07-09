@@ -1,4 +1,5 @@
 use std::fmt;
+use std::num::FpCategory as Fp;
 use std::ops::{Add, Div, Mul, Rem, Sub};
 
 /// Set the default tolerance for float comparison based on the type.
@@ -187,6 +188,7 @@ macro_rules! float_test {
             mod const_ {
                 #[allow(unused)]
                 use super::Approx;
+                use super::*;
                 // Shadow the runtime versions of the macro with const-compatible versions.
                 #[allow(unused)]
                 use $crate::floats::{
@@ -258,7 +260,6 @@ float_test! {
         f128: #[cfg(any(miri, target_has_reliable_f128))],
     },
     test<Float> {
-        use std::num::FpCategory as Fp;
         let nan: Float = Float::NAN;
         assert!(nan.is_nan());
         assert!(!nan.is_infinite());
